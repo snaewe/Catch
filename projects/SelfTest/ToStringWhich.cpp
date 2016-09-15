@@ -1,15 +1,17 @@
-#include "catch.hpp"
 /*
     Demonstrate which version of toString/StringMaker is being used
     for various types
 */
 
+#include <string>
 
 struct has_toString { };
 struct has_maker {};
 struct has_maker_and_toString {};
 
 namespace Catch {
+    template<typename T>
+    struct StringMaker;
     inline std::string toString( const has_toString& ) {
         return "toString( has_toString )";
     }
@@ -29,6 +31,8 @@ namespace Catch {
         }
     };
 }
+
+#include "catch.hpp"
 
 // Call the overload
 TEST_CASE( "toString( has_toString )", "[toString]" ) {
@@ -52,7 +56,7 @@ TEST_CASE( "toString( has_maker_and_toString )", "[toString]" ) {
 TEST_CASE( "toString( vectors<has_toString )", "[toString]" ) {
     std::vector<has_toString> v(1);
     // This invokes template<T> toString which actually gives us '{ ? }'
-    REQUIRE( Catch::toString( v ) == "{ {?} }" );
+    REQUIRE( Catch::toString(v) == "{ toString( has_toString ) }" );
 }
 
 TEST_CASE( "toString( vectors<has_maker )", "[toString]" ) {
@@ -64,5 +68,5 @@ TEST_CASE( "toString( vectors<has_maker )", "[toString]" ) {
 TEST_CASE( "toString( vectors<has_maker_and_toString )", "[toString]" ) {
     std::vector<has_maker_and_toString> v(1);
     // Note: This invokes the template<T> toString -> StringMaker
-    REQUIRE( Catch::toString( v ) == "{ StringMaker<has_maker_and_toString> }" );
+    REQUIRE( Catch::toString( v ) == "{ toString( has_maker_and_toString ) }" );
 }
